@@ -1,4 +1,4 @@
-export type OAuthProvider = "google";
+export type OAuthProvider = "google" | "facebook" | "github";
 
 export type OAuthToken = {
   access_token: string;

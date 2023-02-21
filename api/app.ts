@@ -1,6 +1,10 @@
 import express from "express";
 import compression from "compression";
-import { googleOAuthHandler } from "../utils/functions/oauth";
+import {
+  facebookOAuthHandler,
+  githubOAuthHandler,
+  googleOAuthHandler,
+} from "../utils/functions/oauth";
 
 require("dotenv").config();
 
@@ -16,5 +20,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/sessions/oauth/google", googleOAuthHandler);
+app.get("/api/sessions/oauth/facebook", facebookOAuthHandler);
+app.get("/api/sessions/oauth/github", githubOAuthHandler);
 
 export default app;
