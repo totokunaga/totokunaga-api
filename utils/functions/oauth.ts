@@ -2,12 +2,15 @@ import axios from "axios";
 import qs from "qs";
 import { Request, Response } from "express";
 import { OAuthProvider, OAuthState } from "../types/oauth";
-import { frontendRedirectUrl, oauthConfig } from "../constants/oauth";
+import { oauthConfig } from "../constants/oauth";
+import { frontendOrigins, NODE_ENV } from "../constants";
+
+const frontendOrigin = frontendOrigins[NODE_ENV];
 
 export const oauthHandler = async (req: Request, res: Response) => {
   const provider = req.path.split("/").slice(-1)[0] as OAuthProvider;
   const code = req.query.code as string;
-  const { path } = JSON.parse(req.query.state as string) as OAuthState;
+  const { nounce, path } = JSON.parse(req.query.state as string) as OAuthState;
 
   try {
     const tokenResponse = await getOAuthTokens(provider, code);
@@ -15,9 +18,10 @@ export const oauthHandler = async (req: Request, res: Response) => {
     upsertOAuthUser(provider, tokenResponse);
     // Create a cookie for access token and refresh token
 
-    return res.redirect(frontendRedirectUrl + path);
+    const redirectQueries = qs.stringify({ nounce });
+    return res.redirect(frontendOrigin + path + `?${redirectQueries}`);
   } catch (e: any) {
-    return res.redirect(frontendRedirectUrl);
+    return res.redirect(frontendOrigin);
   }
 };
 

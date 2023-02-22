@@ -18,13 +18,6 @@ const rootRedirectUrl: Record<Env, string> = {
   production: "https://totokunaga.com" + redirectPath,
 };
 
-const frontendRedirectUrls: Record<Env, string> = {
-  development: "http://localhost:3000",
-  test: "https://totokunaga.com",
-  production: "https://totokunaga.com",
-};
-export const frontendRedirectUrl = frontendRedirectUrls[NODE_ENV];
-
 export const oauthConfig: Record<OAuthProvider, OAuthConfig> = {
   google: {
     client_id: process.env.GOOGLE_CLIENT_ID as string,
