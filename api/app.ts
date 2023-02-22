@@ -1,12 +1,7 @@
 import express from "express";
 import compression from "compression";
-import {
-  facebookOAuthHandler,
-  githubOAuthHandler,
-  googleOAuthHandler,
-} from "../utils/functions/oauth";
-
-require("dotenv").config();
+import { oauthHandler } from "../utils/functions/oauth";
+import { FACEBOOK, GITHUB, GOOGLE } from "../utils/types";
 
 const app = express();
 app.disable("x-powered-by");
@@ -23,8 +18,8 @@ app.get("/api/health", (req, res) => {
   return res.send({ message: "pod is healthy" });
 });
 
-app.get("/api/sessions/oauth/google", googleOAuthHandler);
-app.get("/api/sessions/oauth/facebook", facebookOAuthHandler);
-app.get("/api/sessions/oauth/github", githubOAuthHandler);
+app.get(`/api/sessions/oauth/${GOOGLE}`, oauthHandler);
+app.get(`/api/sessions/oauth/${FACEBOOK}`, oauthHandler);
+app.get(`/api/sessions/oauth/${GITHUB}`, oauthHandler);
 
 export default app;

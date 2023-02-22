@@ -1,4 +1,32 @@
 export type OAuthProvider = "google" | "facebook" | "github";
+export const GOOGLE: OAuthProvider = "google";
+export const FACEBOOK: OAuthProvider = "facebook";
+export const GITHUB: OAuthProvider = "github";
+
+export type OAuthConfig = {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  additionalQueries?: Record<string, string>;
+  tokenEndpoint: {
+    url: string;
+    queryType: "queries" | "data";
+    headers?: Record<string, string>;
+    userInfoAccessTokenKey: string;
+    userInfoBearerTokenKey: string;
+  };
+  userInfoEndpoint: {
+    url: string;
+    nameKey: string;
+    idKey: string;
+    profilePictureKey: string;
+  };
+};
+
+export type OAuthState = {
+  nounce: string;
+  path: string;
+};
 
 export type OAuthToken = {
   access_token: string;
