@@ -18,12 +18,12 @@ export const getOAuthTokens = async (
 ): Promise<any> => {
   const url = tokenEndpoints[provider];
 
-  const providerConfig = config.oauth[provider];
+  const { client_id, client_secret, redirect_uri } = config.oauth[provider];
   const values = {
     code,
-    client_id: providerConfig.clientId,
-    client_secret: providerConfig.clientSecret,
-    redirect_uri: providerConfig.redirectURI,
+    client_id,
+    client_secret,
+    redirect_uri,
     grant_type: "authorization_code",
   };
 
@@ -75,9 +75,9 @@ export const googleOAuthHandler = async (req: Request, res: Response) => {
     // Upsert a user to the database
     // Create a cookie for access token and refresh token
 
-    return res.redirect(config.oauth.frontendRedirectURI + "/algorithms");
+    return res.redirect(config.oauth.frontendRedirectUrl + "/algorithms");
   } catch (e: any) {
-    return res.redirect(config.oauth.frontendRedirectURI);
+    return res.redirect(config.oauth.frontendRedirectUrl);
   }
 };
 
@@ -101,9 +101,9 @@ export const facebookOAuthHandler = async (req: Request, res: Response) => {
     // Upsert a user to the database
     // Create a cookie for access token and refresh token
 
-    return res.redirect(config.oauth.frontendRedirectURI + "/algorithms");
+    return res.redirect(config.oauth.frontendRedirectUrl + "/algorithms");
   } catch (e: any) {
-    return res.redirect(config.oauth.frontendRedirectURI);
+    return res.redirect(config.oauth.frontendRedirectUrl);
   }
 };
 
@@ -127,8 +127,8 @@ export const githubOAuthHandler = async (req: Request, res: Response) => {
     // Upsert a user to the database
     // Create a cookie for access token and refresh token
 
-    return res.redirect(config.oauth.frontendRedirectURI + "/algorithms");
+    return res.redirect(config.oauth.frontendRedirectUrl + "/algorithms");
   } catch (e: any) {
-    return res.redirect(config.oauth.frontendRedirectURI);
+    return res.redirect(config.oauth.frontendRedirectUrl);
   }
 };

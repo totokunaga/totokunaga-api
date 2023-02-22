@@ -19,6 +19,10 @@ app.get("/", (req, res) => {
   return res.send({ message: "hello world!" });
 });
 
+app.get("/api/health", (req, res) => {
+  return res.send({ message: "pod is healthy" });
+});
+
 app.get("/api/sessions/oauth/google", googleOAuthHandler);
 app.get("/api/sessions/oauth/facebook", facebookOAuthHandler);
 app.get("/api/sessions/oauth/github", githubOAuthHandler);

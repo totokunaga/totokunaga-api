@@ -67,7 +67,7 @@ if [ $cloud_env  != $LOCAL ]; then
     docker push ${remote_img_tag}
 
     # Phase3 Update deployment
-    # kubectl set image deployment/${deployment_name} ${deployment_name}=${remote_img_tag}
+    kubectl set image deployment/${deployment_name} ${deployment_name}=${remote_img_tag}
   fi
 fi
 
