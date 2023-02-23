@@ -8,7 +8,7 @@ import { frontendOrigins, NODE_ENV } from "../constants";
 const frontendOrigin = frontendOrigins[NODE_ENV];
 
 export const oauthHandler = async (req: Request, res: Response) => {
-  const provider = req.path.split("/").slice(-1)[0] as OAuthProvider;
+  const provider = req.params.provider as OAuthProvider;
   const code = req.query.code as string;
   const { nounce, path } = JSON.parse(req.query.state as string) as OAuthState;
 

@@ -35,9 +35,7 @@ app.get("/api/health", (req, res) => {
   return res.send({ message: "pod is healthy" });
 });
 
-app.get(`/api/sessions/oauth/${GOOGLE}`, oauthHandler);
-app.get(`/api/sessions/oauth/${FACEBOOK}`, oauthHandler);
-app.get(`/api/sessions/oauth/${GITHUB}`, oauthHandler);
+app.get(`/api/sessions/oauth/:provider`, oauthHandler);
 app.get("/api/sessions/token", (req: Request, res: Response) => {
   const accessToken = generateAccessToken();
   return res
