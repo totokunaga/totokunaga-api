@@ -4,6 +4,8 @@ import { Request, Response } from "express";
 import { OAuthProvider, OAuthState } from "../types/oauth";
 import { oauthConfig } from "../constants/oauth";
 import { frontendOrigins, NODE_ENV } from "../constants";
+import { userRepository } from "../../db/DataSource";
+import { initUser, User } from "../../db/User";
 
 const frontendOrigin = frontendOrigins[NODE_ENV];
 
@@ -76,6 +78,22 @@ const upsertOAuthUser = async (provider: OAuthProvider, tokenResponse: any) => {
     const id = userInfo[userInfoEndpoint.idKey];
     const name = userInfo[userInfoEndpoint.nameKey];
     const picture = userInfo[userInfoEndpoint.profilePictureKey];
+
+    const existingUser = await userRepository.findOneBy({
+      oauthProvider: provider,
+      oauthUserId: id,
+    });
+
+    if (!existingUser) {
+      await userRepository.save(
+        initUser({
+          name,
+          oauthProvider: provider,
+          oauthUserId: id,
+          avatorImagePath: picture,
+        })
+      );
+    }
 
     // Sync with database
   } catch (e: any) {
