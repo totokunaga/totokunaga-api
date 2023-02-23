@@ -1,8 +1,14 @@
 FROM node:18-alpine3.15 as builder
 
-RUN apk update && apk add curl
-RUN apk --no-cache add tzdata && \
-    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+RUN apk update && apk add curl \
+  && apk add --no-cache python3 \ 
+  && apk add --no-cache bind-tools \
+  && apk --no-cache add tzdata \
+  && apk add py3-pip \
+  && apk add mariadb \
+  && apk add mysql-client
+
+RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
     apk del tzdata
 
 WORKDIR /app
