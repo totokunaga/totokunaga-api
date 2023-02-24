@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { OAuthProvider } from "../../utils/types";
+import { OAuthProvider } from "../../../utils/types";
 
 @Entity()
 export class User {

@@ -4,8 +4,9 @@ import { Request, Response } from "express";
 import { OAuthProvider, OAuthState } from "../types/oauth";
 import { oauthConfig } from "../constants/oauth";
 import { frontendOrigins, NODE_ENV } from "../constants";
-import { userRepository } from "../../db/DataSource";
-import { initUser, User } from "../../db/User";
+import { userRepository } from "../../db/orm/DataSource";
+import { initUser } from "../../db/orm/User";
+import { redisClient } from "../../db/redis";
 
 const frontendOrigin = frontendOrigins[NODE_ENV];
 
@@ -15,13 +16,21 @@ export const oauthHandler = async (req: Request, res: Response) => {
   const { nounce, path } = JSON.parse(req.query.state as string) as OAuthState;
 
   try {
+    // Check if the authorized user isn't an attacker
+    const nounceExists = await redisClient.exists(nounce);
+    if (!nounceExists) {
+      return res.redirect(frontendOrigin + "/404");
+    }
+    await redisClient.del(nounce);
+
     const tokenResponse = await getOAuthTokens(provider, code);
     // Upsert a user to the database
     upsertOAuthUser(provider, tokenResponse);
-    // Create a cookie for access token and refresh token
+    // Generate a JWT token and set a cookie
 
-    const redirectQueries = qs.stringify({ nounce });
-    return res.redirect(frontendOrigin + path + `?${redirectQueries}`);
+    // const redirectQueries = qs.stringify({ nounce });
+    // return res.redirect(frontendOrigin + path + `?${redirectQueries}`);
+    return res.redirect(frontendOrigin + path);
   } catch (e: any) {
     return res.redirect(frontendOrigin);
   }

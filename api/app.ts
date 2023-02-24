@@ -2,9 +2,10 @@ import express, { Request, Response } from "express";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import { oauthHandler } from "../utils/functions/oauth";
-import { FACEBOOK, GITHUB, GOOGLE } from "../utils/types";
 import { allowedOrigins } from "../utils/constants";
 import { generateAccessToken } from "../utils/functions";
+import { userRepository } from "../db/orm/DataSource";
+import { redisClient } from "../db/redis";
 
 const app = express();
 app.disable("x-powered-by");
@@ -35,7 +36,27 @@ app.get("/api/health", (req, res) => {
   return res.send({ message: "pod is healthy" });
 });
 
-app.get(`/api/sessions/oauth/:provider`, oauthHandler);
+app.post(
+  "/api/sessions/oauth/save_nounce",
+  async (req: Request, res: Response) => {
+    const { nounce } = req.body;
+    try {
+      const keyExists = await redisClient.exists(nounce);
+      if (keyExists) {
+        return res.status(400).send("Given nounce is already taken");
+      } else {
+        await redisClient.set(nounce, 1);
+        return res.end();
+      }
+    } catch (e: any) {
+      console.error(e.message);
+      return res
+        .status(500)
+        .send("Failed to communicate with a session server");
+    }
+  }
+);
+app.get("/api/sessions/oauth/:provider", oauthHandler);
 app.get("/api/sessions/token", (req: Request, res: Response) => {
   const accessToken = generateAccessToken();
   return res
@@ -44,6 +65,16 @@ app.get("/api/sessions/token", (req: Request, res: Response) => {
       secure: true,
     })
     .end();
+});
+
+app.get("/api/db/user/avator", async (req: Request, res: Response) => {
+  const user = await userRepository.findOne({
+    where: {
+      oauthProvider: "google",
+    },
+  });
+
+  return res.send(user?.avatorImagePath);
 });
 
 export default app;

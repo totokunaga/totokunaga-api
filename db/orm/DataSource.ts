@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { NODE_ENV } from "../utils/constants";
-import { databaseConfig } from "../utils/constants/database";
+import { NODE_ENV } from "../../utils/constants";
+import { databaseConfig } from "../../utils/constants/database";
 import { User } from "./User";
 
 console.log(databaseConfig[NODE_ENV]);

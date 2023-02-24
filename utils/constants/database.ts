@@ -5,9 +5,12 @@ config();
 
 export const gcpCloudSqlPW = "&@V;1oliZz}LSZ;Q";
 
-type DatabaseConfig = {
+type RemoteHost = {
   host: string;
   port: number;
+};
+
+type DatabaseConfig = RemoteHost & {
   username: string;
   password: string;
   database: string;
@@ -34,5 +37,20 @@ export const databaseConfig: Record<Env, DatabaseConfig> = {
     username: process.env.DB_USER as string,
     password: process.env.DB_PASS as string,
     database: process.env.DB_NAME as string,
+  },
+};
+
+export const redisConfig: Record<Env, RemoteHost> = {
+  development: {
+    host: "127.0.0.1",
+    port: 6379,
+  },
+  test: {
+    host: "127.0.0.1",
+    port: 6379,
+  },
+  production: {
+    host: "127.0.0.1",
+    port: 6379,
   },
 };
