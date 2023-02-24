@@ -65,12 +65,13 @@ export const generateJwtHeader = () => {
 export const generateJwtPayload = (data: JWTMetadata) => {
   const { oauthProvider, oauthId, name, avatorImagePath } = data;
 
-  const now = new Date().getTime();
+  const now = Math.floor(new Date().getTime() / 1000);
 
   const payload: JWTPayload = {
     iss: "totokunaga",
     sub: `${oauthProvider}_${oauthId}`,
-    exp: now + 30 * 24 * 60 * 60 * 1000,
+    // exp: now + 30 * 24 * 60 * 60 * 1000,
+    exp: now + 60,
     iat: now,
     sessionId: "",
     metadata: {

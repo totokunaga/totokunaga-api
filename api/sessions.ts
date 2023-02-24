@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import { redisClient } from "../db/redis";
-import { checkCors } from "../utils/functions";
 import {
   generateIdToken,
   sha256Secret,
@@ -43,7 +42,7 @@ sessionRouter.get(
       const { payload } = decodedJwt;
       const { exp, metadata } = payload;
 
-      const now = new Date().getTime();
+      const now = Math.floor(new Date().getTime() / 1000);
       if (now <= exp) {
         const newToken = generateIdToken(metadata);
         return res.send(newToken);
