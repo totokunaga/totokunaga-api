@@ -34,17 +34,21 @@ sessionRouter.get("/oauth/:provider", oauthHandler);
 
 sessionRouter.get(
   "/token/refresh",
-  (req: Request<unknown, { oldToken: string }>, res: Response) => {
+  async (req: Request<unknown, { oldToken: string }>, res: Response) => {
     const { authorization: oldToken } = req.headers;
     const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
 
     if (decodedJwt) {
       const { payload } = decodedJwt;
-      const { exp, metadata } = payload;
+      const { iat, exp, metadata } = payload;
+      const { oauthProvider, oauthId } = metadata;
 
       const now = Math.floor(new Date().getTime() / 1000);
-      if (now <= exp) {
-        const newToken = generateIdToken(metadata);
+      const currIat = iat.toString();
+      const lastIat = await redisClient.get(`${oauthProvider}_${oauthId}`);
+
+      if (currIat === lastIat && now <= exp) {
+        const newToken = await generateIdToken(metadata);
         return res.send(newToken);
       }
     }

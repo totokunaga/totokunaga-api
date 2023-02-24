@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { redisClient } from "../../db/redis";
 import { JWTHeader, JWTMetadata, JWTPayload, OAuthProvider } from "../types";
 
 export const sha256Secret = "Ud7o8vbNCkMjQwLb";
@@ -62,17 +63,14 @@ export const generateJwtHeader = () => {
   return header;
 };
 
-export const generateJwtPayload = (data: JWTMetadata) => {
+export const generateJwtPayload = (data: JWTMetadata, iat: number) => {
   const { oauthProvider, oauthId, name, avatorImagePath } = data;
-
-  const now = Math.floor(new Date().getTime() / 1000);
 
   const payload: JWTPayload = {
     iss: "totokunaga",
     sub: `${oauthProvider}_${oauthId}`,
-    // exp: now + 30 * 24 * 60 * 60 * 1000,
-    exp: now + 60,
-    iat: now,
+    exp: iat + 60,
+    iat,
     sessionId: "",
     metadata: {
       name,
@@ -85,10 +83,14 @@ export const generateJwtPayload = (data: JWTMetadata) => {
   return payload;
 };
 
-export const generateIdToken = (data: JWTMetadata) => {
+export const generateIdToken = async (data: JWTMetadata) => {
+  const iat = Math.floor(new Date().getTime() / 1000);
   const header = generateJwtHeader();
-  const payload = generateJwtPayload(data);
+  const payload = generateJwtPayload(data, iat);
   const idToken = generateJwt(header, payload, sha256Secret);
+
+  const { oauthProvider, oauthId } = data;
+  await redisClient.set(`${oauthProvider}_${oauthId}`, iat);
 
   return idToken;
 };

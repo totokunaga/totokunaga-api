@@ -30,7 +30,7 @@ export const oauthHandler = async (req: Request, res: Response) => {
     const userData = await upsertOAuthUser(provider, tokenResponse);
 
     // Generate a JWT token and set a cookie
-    const idToken = generateIdToken(userData);
+    const idToken = await generateIdToken(userData);
     res.cookie("token", idToken, { secure: true });
 
     return res.redirect(frontendOrigin + path);
