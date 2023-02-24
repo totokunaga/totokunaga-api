@@ -7,6 +7,8 @@ import { frontendOrigins, NODE_ENV } from "../constants";
 import { userRepository } from "../../db/orm/DataSource";
 import { initUser } from "../../db/orm/User";
 import { redisClient } from "../../db/redis";
+import { generateIdToken } from "./jwt";
+import { JWTMetadata } from "../types";
 
 const frontendOrigin = frontendOrigins[NODE_ENV];
 
@@ -23,13 +25,14 @@ export const oauthHandler = async (req: Request, res: Response) => {
     }
     await redisClient.del(nounce);
 
-    const tokenResponse = await getOAuthTokens(provider, code);
     // Upsert a user to the database
-    upsertOAuthUser(provider, tokenResponse);
-    // Generate a JWT token and set a cookie
+    const tokenResponse = await getOAuthTokens(provider, code);
+    const userData = await upsertOAuthUser(provider, tokenResponse);
 
-    // const redirectQueries = qs.stringify({ nounce });
-    // return res.redirect(frontendOrigin + path + `?${redirectQueries}`);
+    // Generate a JWT token and set a cookie
+    const idToken = generateIdToken(userData);
+    res.cookie("token", idToken, { secure: true });
+
     return res.redirect(frontendOrigin + path);
   } catch (e: any) {
     return res.redirect(frontendOrigin);
@@ -84,25 +87,27 @@ const upsertOAuthUser = async (provider: OAuthProvider, tokenResponse: any) => {
         headers: { Authorization: `Bearer ${bearerToken}` },
       })
     ).data;
-    const id = userInfo[userInfoEndpoint.idKey];
-    const name = userInfo[userInfoEndpoint.nameKey];
-    const picture = userInfo[userInfoEndpoint.profilePictureKey];
+
+    const id = userInfo[userInfoEndpoint.idKey] as string;
+    const name = userInfo[userInfoEndpoint.nameKey] as string;
+    const picture = userInfo[userInfoEndpoint.profilePictureKey] as string;
 
     const existingUser = await userRepository.findOneBy({
       oauthProvider: provider,
       oauthUserId: id,
     });
 
+    const userData: JWTMetadata = {
+      name,
+      oauthProvider: provider,
+      oauthId: id,
+      avatorImagePath: picture,
+    };
+
     if (!existingUser) {
-      await userRepository.save(
-        initUser({
-          name,
-          oauthProvider: provider,
-          oauthUserId: id,
-          avatorImagePath: picture,
-        })
-      );
+      await userRepository.save(initUser(userData));
     }
+    return userData;
 
     // Sync with database
   } catch (e: any) {

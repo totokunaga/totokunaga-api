@@ -1,3 +1,20 @@
+import { NextFunction, Request, Response } from "express";
+import { allowedOrigins } from "../constants";
+
+export const checkCors = (req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin as string;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.set({
+    "Access-Control-Allow-Credentials": true,
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+
+  next();
+};
+
 export const getRandomString = (length: number) => {
   let result = "";
   const characters =
@@ -9,12 +26,4 @@ export const getRandomString = (length: number) => {
     counter += 1;
   }
   return result;
-};
-
-export const generateAccessToken = () => {
-  const length = 16;
-  const token = Array.from({ length: 3 }, () => "")
-    .map(() => getRandomString(length))
-    .join("_");
-  return token;
 };

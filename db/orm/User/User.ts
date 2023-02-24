@@ -22,12 +22,12 @@ export class User {
 export const initUser = (data: {
   name: string;
   oauthProvider?: OAuthProvider;
-  oauthUserId?: string;
+  oauthId?: string;
   avatorImagePath?: string;
 }) => {
   const user = new User();
   user.name = data.name;
-  user.oauthUserId = data.oauthUserId || "";
+  user.oauthUserId = data.oauthId || "";
   user.avatorImagePath = data.avatorImagePath || "";
   if (data.oauthProvider) {
     user.oauthProvider = data.oauthProvider;

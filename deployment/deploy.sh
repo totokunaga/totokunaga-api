@@ -59,7 +59,7 @@ docker image build \
   .
 
 # Phase2 Tagging and pushing the image
-docker tag ${img_tag} ${remote_img_tag}
+# docker tag ${img_tag} ${remote_img_tag}
 
 if [ $cloud_env  != $LOCAL ]; then
   if [ -z $without_deploy ]; then

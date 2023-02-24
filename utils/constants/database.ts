@@ -50,7 +50,7 @@ export const redisConfig: Record<Env, RemoteHost> = {
     port: 6379,
   },
   production: {
-    host: "127.0.0.1",
+    host: "10.41.0.238",
     port: 6379,
   },
 };

@@ -2,6 +2,7 @@ import app from "./api/app";
 import { AppDataSource } from "./db/orm";
 
 const PORT = 4000;
+
 app.listen(PORT, async () => {
   try {
     await AppDataSource.initialize();
