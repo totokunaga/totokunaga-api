@@ -57,4 +57,22 @@ sessionRouter.get(
   }
 );
 
+sessionRouter.get("/token/logout", async (req: Request, res: Response) => {
+  const { authorization: oldToken } = req.headers;
+  const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
+
+  if (decodedJwt) {
+    const { payload } = decodedJwt;
+    const { metadata } = payload;
+    const { oauthProvider, oauthId } = metadata;
+
+    try {
+      await redisClient.del(`${oauthProvider}_${oauthId}`);
+    } catch (e: any) {
+      console.error("Failed to communicate with a Redis server:", e.message);
+    }
+  }
+  return res.end();
+});
+
 export default sessionRouter;
