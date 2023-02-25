@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development nodemon index.ts",
     "start:prod": "NODE_ENV=production ts-node index.ts",
-    "deploy": "./deployment/deploy.sh -a backend -c gcp -e prod",
+    "deploy": "./deployment/scripts/deploy.sh -a backend -c gcp -e prod",
     "reinstall": "rm -rf node_modules && yarn"
   },
   "keywords": [],

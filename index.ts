@@ -1,5 +1,5 @@
-import app from "./api/app";
-import { AppDataSource } from "./db/orm";
+import app from "./src/api/app";
+import { AppDataSource } from "./src/db/orm";
 
 const PORT = 4000;
 

@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { redisClient } from "../../db/redis";
-import { JWTHeader, JWTMetadata, JWTPayload, OAuthProvider } from "../types";
+import { JWTHeader, JWTMetadata, JWTPayload } from "../types";
 
 export const sha256Secret = "Ud7o8vbNCkMjQwLb";
 

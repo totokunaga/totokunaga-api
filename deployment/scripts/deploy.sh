@@ -72,4 +72,4 @@ if [ $cloud_env  != $LOCAL ]; then
 fi
 
 # Phase4 Remove old local images
-docker image ls --filter=reference="${img_name}" --format "table {{.ID}}" | xargs sh ./deployment/remove_old_local_images.sh
+docker image ls --filter=reference="${img_name}" --format "table {{.ID}}" | xargs sh ./deployment/scripts/remove_old_local_images.sh

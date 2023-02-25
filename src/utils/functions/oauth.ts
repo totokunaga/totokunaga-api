@@ -3,14 +3,12 @@ import qs from "qs";
 import { Request, Response } from "express";
 import { OAuthProvider, OAuthState } from "../types/oauth";
 import { oauthConfig } from "../constants/oauth";
-import { frontendOrigins, NODE_ENV } from "../constants";
+import { frontendOrigin } from "../constants";
 import { userRepository } from "../../db/orm/DataSource";
 import { initUser } from "../../db/orm/User";
 import { redisClient } from "../../db/redis";
 import { generateIdToken } from "./jwt";
 import { JWTMetadata } from "../types";
-
-const frontendOrigin = frontendOrigins[NODE_ENV];
 
 export const oauthHandler = async (req: Request, res: Response) => {
   const provider = req.params.provider as OAuthProvider;

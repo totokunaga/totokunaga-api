@@ -1,12 +1,11 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { NODE_ENV } from "../../utils/constants";
-import { databaseConfig } from "../../utils/constants/database";
+import { databaseConfig } from "../../utils/configs";
 import { User } from "./User";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
-  ...databaseConfig[NODE_ENV],
+  ...databaseConfig,
   entities: [User],
   synchronize: true,
   logging: false,

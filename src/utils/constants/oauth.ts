@@ -1,28 +1,17 @@
-import { NODE_ENV } from ".";
-import {
-  Env,
-  FACEBOOK,
-  GITHUB,
-  GOOGLE,
-  OAuthConfig,
-  OAuthProvider,
-} from "../types";
+import { backendOrigin } from ".";
+import { FACEBOOK, GITHUB, GOOGLE, OAuthConfig, OAuthProvider } from "../types";
 import { config } from "dotenv";
 
 config();
 
 const redirectPath = "/api/sessions/oauth";
-const rootRedirectUrl: Record<Env, string> = {
-  development: "http://localhost:4000" + redirectPath,
-  test: "https://totokunaga.com" + redirectPath,
-  production: "https://totokunaga.com" + redirectPath,
-};
+const rootRedirectUrl = backendOrigin + redirectPath;
 
 export const oauthConfig: Record<OAuthProvider, OAuthConfig> = {
   google: {
     client_id: process.env.GOOGLE_CLIENT_ID as string,
     client_secret: process.env.GOOGLE_CLIENT_SECRET as string,
-    redirect_uri: rootRedirectUrl[NODE_ENV] + `/${GOOGLE}`,
+    redirect_uri: rootRedirectUrl + `/${GOOGLE}`,
     additionalQueries: { grant_type: "authorization_code" },
     tokenEndpoint: {
       url: "https://oauth2.googleapis.com/token",
@@ -43,7 +32,7 @@ export const oauthConfig: Record<OAuthProvider, OAuthConfig> = {
   facebook: {
     client_id: process.env.FACEBOOK_CLIENT_ID as string,
     client_secret: process.env.FACEBOOK_CLIENT_SECRET as string,
-    redirect_uri: rootRedirectUrl[NODE_ENV] + `/${FACEBOOK}`,
+    redirect_uri: rootRedirectUrl + `/${FACEBOOK}`,
     tokenEndpoint: {
       url: "https://graph.facebook.com/v16.0/oauth/access_token",
       queryType: "queries",
@@ -60,7 +49,7 @@ export const oauthConfig: Record<OAuthProvider, OAuthConfig> = {
   github: {
     client_id: process.env.GITHUB_CLIENT_ID as string,
     client_secret: process.env.GITHUB_CLIENT_SECRET as string,
-    redirect_uri: rootRedirectUrl[NODE_ENV] + `/${GITHUB}`,
+    redirect_uri: rootRedirectUrl + `/${GITHUB}`,
     tokenEndpoint: {
       url: "https://github.com/login/oauth/access_token",
       queryType: "data",

@@ -1,6 +1,7 @@
 node_modules
 deployment
 
+.env
 *.yaml
 *.crt
 *.key
