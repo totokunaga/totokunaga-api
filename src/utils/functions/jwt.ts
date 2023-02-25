@@ -69,7 +69,7 @@ export const generateJwtPayload = (data: JWTMetadata, iat: number) => {
   const payload: JWTPayload = {
     iss: "totokunaga",
     sub: `${oauthProvider}_${oauthId}`,
-    exp: iat + 60,
+    exp: iat + 60 * 60,
     iat,
     sessionId: "",
     metadata: {

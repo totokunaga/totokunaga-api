@@ -57,7 +57,7 @@ sessionRouter.get(
   }
 );
 
-sessionRouter.get("/token/logout", async (req: Request, res: Response) => {
+sessionRouter.post("/oauth/logout", async (req: Request, res: Response) => {
   const { authorization: oldToken } = req.headers;
   const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
 
