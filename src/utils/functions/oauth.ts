@@ -7,7 +7,6 @@ import { frontendOrigin } from "../constants";
 import { userRepository } from "../../db/orm/DataSource";
 import { initUser } from "../../db/orm/User";
 import { redisClient } from "../../db/redis";
-import { generateIdToken } from "./jwt";
 import { JWTMetadata } from "../types";
 
 export const oauthHandler = async (req: Request, res: Response) => {
@@ -24,10 +23,7 @@ export const oauthHandler = async (req: Request, res: Response) => {
 
     // Upsert a user to the database
     const tokenResponse = await getOAuthTokens(provider, code);
-    const userData = await upsertOAuthUser(provider, tokenResponse, nounce);
-
-    // Generate a JWT token and set a cookie
-    // const idToken = await generateIdToken(userData);
+    await upsertOAuthUser(provider, tokenResponse, nounce);
 
     return res.redirect(`${frontendOrigin}/${path}?nounce=${nounce}`);
   } catch (e: any) {
@@ -90,9 +86,13 @@ const upsertOAuthUser = async (
       })
     ).data;
 
-    const id = userInfo[userInfoEndpoint.idKey] as string;
-    const name = userInfo[userInfoEndpoint.nameKey] as string;
-    const picture = userInfo[userInfoEndpoint.profilePictureKey] as string;
+    const { idKey, nameKey, profilePictureKey, profilePictureHandler } =
+      userInfoEndpoint;
+    const id = userInfo[idKey] as string;
+    const name = userInfo[nameKey] as string;
+    const picture = profilePictureKey
+      ? (userInfo[profilePictureKey] as string)
+      : await profilePictureHandler!(id, accessToken);
 
     const existingUser = await userRepository.findOneBy({
       oauthProvider: provider,

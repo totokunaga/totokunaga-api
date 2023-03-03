@@ -19,7 +19,11 @@ export type OAuthConfig = {
     url: string;
     nameKey: string;
     idKey: string;
-    profilePictureKey: string;
+    profilePictureKey?: string;
+    profilePictureHandler?: (
+      userId: string,
+      accessToken: string
+    ) => Promise<string>;
   };
 };
 

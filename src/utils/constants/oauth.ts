@@ -1,6 +1,7 @@
 import { backendOrigin } from ".";
 import { FACEBOOK, GITHUB, GOOGLE, OAuthConfig, OAuthProvider } from "../types";
 import { config } from "dotenv";
+import axios from "axios";
 
 config();
 
@@ -43,7 +44,14 @@ export const oauthConfig: Record<OAuthProvider, OAuthConfig> = {
       url: "https://graph.facebook.com/v16.0/me",
       nameKey: "name",
       idKey: "id",
-      profilePictureKey: "",
+      profilePictureHandler: async (userId: string, accessToken: string) => {
+        const endpoint = `https://graph.facebook.com/v16.0/${userId}/picture?redirect=false&type=large`;
+        const response = await axios.get(endpoint, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const pictureUrl = response.data.data.url;
+        return pictureUrl;
+      },
     },
   },
   github: {
