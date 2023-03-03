@@ -21,17 +21,15 @@ export const oauthHandler = async (req: Request, res: Response) => {
     if (!nounceExists) {
       return res.redirect(frontendOrigin + "/404");
     }
-    await redisClient.del(nounce);
 
     // Upsert a user to the database
     const tokenResponse = await getOAuthTokens(provider, code);
-    const userData = await upsertOAuthUser(provider, tokenResponse);
+    const userData = await upsertOAuthUser(provider, tokenResponse, nounce);
 
     // Generate a JWT token and set a cookie
-    const idToken = await generateIdToken(userData);
-    res.cookie("token", idToken, { secure: true });
+    // const idToken = await generateIdToken(userData);
 
-    return res.redirect(frontendOrigin + path);
+    return res.redirect(`${frontendOrigin}/${path}?nounce=${nounce}`);
   } catch (e: any) {
     return res.redirect(frontendOrigin);
   }
@@ -75,7 +73,11 @@ export const getOAuthTokens = async (
   }
 };
 
-const upsertOAuthUser = async (provider: OAuthProvider, tokenResponse: any) => {
+const upsertOAuthUser = async (
+  provider: OAuthProvider,
+  tokenResponse: any,
+  nounce: string
+) => {
   const { tokenEndpoint, userInfoEndpoint } = oauthConfig[provider];
   const accessToken = tokenResponse[tokenEndpoint.userInfoAccessTokenKey];
   const bearerToken = tokenResponse[tokenEndpoint.userInfoBearerTokenKey];
@@ -103,6 +105,7 @@ const upsertOAuthUser = async (provider: OAuthProvider, tokenResponse: any) => {
       oauthId: id,
       avatorImagePath: picture,
     };
+    await redisClient.set(nounce, JSON.stringify(userData));
 
     if (!existingUser) {
       await userRepository.save(initUser(userData));

@@ -51,6 +51,15 @@ sessionRouter.get(
         const newToken = await generateIdToken(metadata);
         return res.send(newToken);
       }
+    } else {
+      const nounceKey = oldToken || "";
+      const userSession = await redisClient.get(nounceKey);
+      if (userSession) {
+        const userData = JSON.parse(userSession);
+        const newToken = await generateIdToken(userData);
+        await redisClient.del(nounceKey);
+        return res.send(newToken);
+      }
     }
 
     return res.status(401).send("login session expired");
