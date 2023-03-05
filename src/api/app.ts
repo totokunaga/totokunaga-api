@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import sessionRouter from "./sessions";
 import dbRouter from "./db";
 import { checkCors } from "../utils/functions";
+import { paths } from "../utils/constants/api";
 
 const app = express();
 app.disable("x-powered-by");
@@ -14,14 +15,14 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 
-app.use("/api/sessions", sessionRouter);
-app.use("/api/db", dbRouter);
+app.use(paths.session.root, sessionRouter);
+app.use(paths.db.root, dbRouter);
 
-app.get("/", (req, res) => {
+app.get(paths.root, (req, res) => {
   return res.send({ message: "hello world!" });
 });
 
-app.get("/api/health", (req, res) => {
+app.get(paths.health, (req, res) => {
   return res.send({ message: "pod is healthy" });
 });
 

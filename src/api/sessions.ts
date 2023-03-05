@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import { redisClient } from "../db/redis";
+import { paths } from "../utils/constants/api";
 import {
   generateIdToken,
   sha256Secret,
@@ -10,15 +11,15 @@ import { oauthHandler } from "../utils/functions/oauth";
 const sessionRouter = Router();
 
 sessionRouter.post(
-  "/oauth/save_nounce",
+  paths.session.savenonce,
   async (req: Request, res: Response) => {
-    const { nounce } = req.body;
+    const { nonce } = req.body;
     try {
-      const keyExists = await redisClient.exists(nounce);
+      const keyExists = await redisClient.exists(nonce);
       if (keyExists) {
-        return res.status(400).send("Given nounce is already taken");
+        return res.status(400).send("Given nonce is already taken");
       } else {
-        await redisClient.set(nounce, 1);
+        await redisClient.set(nonce, 1);
         return res.end();
       }
     } catch (e: any) {
@@ -30,10 +31,10 @@ sessionRouter.post(
   }
 );
 
-sessionRouter.get("/oauth/:provider", oauthHandler);
+sessionRouter.get(paths.session.oauthRedirect, oauthHandler);
 
 sessionRouter.get(
-  "/token/refresh",
+  paths.session.tokenRefresh,
   async (req: Request<unknown, { oldToken: string }>, res: Response) => {
     const { authorization: oldToken } = req.headers;
     const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
@@ -52,12 +53,12 @@ sessionRouter.get(
         return res.send(newToken);
       }
     } else {
-      const nounceKey = oldToken || "";
-      const userSession = await redisClient.get(nounceKey);
+      const nonceKey = oldToken || "";
+      const userSession = await redisClient.get(nonceKey);
       if (userSession) {
         const userData = JSON.parse(userSession);
         const newToken = await generateIdToken(userData);
-        await redisClient.del(nounceKey);
+        await redisClient.del(nonceKey);
         return res.send(newToken);
       }
     }
@@ -66,22 +67,25 @@ sessionRouter.get(
   }
 );
 
-sessionRouter.post("/oauth/logout", async (req: Request, res: Response) => {
-  const { authorization: oldToken } = req.headers;
-  const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
+sessionRouter.post(
+  paths.session.logout,
+  async (req: Request, res: Response) => {
+    const { authorization: oldToken } = req.headers;
+    const decodedJwt = verifyJwt(oldToken || "", sha256Secret);
 
-  if (decodedJwt) {
-    const { payload } = decodedJwt;
-    const { metadata } = payload;
-    const { oauthProvider, oauthId } = metadata;
+    if (decodedJwt) {
+      const { payload } = decodedJwt;
+      const { metadata } = payload;
+      const { oauthProvider, oauthId } = metadata;
 
-    try {
-      await redisClient.del(`${oauthProvider}_${oauthId}`);
-    } catch (e: any) {
-      console.error("Failed to communicate with a Redis server:", e.message);
+      try {
+        await redisClient.del(`${oauthProvider}_${oauthId}`);
+      } catch (e: any) {
+        console.error("Failed to communicate with a Redis server:", e.message);
+      }
     }
+    return res.end();
   }
-  return res.end();
-});
+);
 
 export default sessionRouter;

@@ -28,7 +28,7 @@ export type OAuthConfig = {
 };
 
 export type OAuthState = {
-  nounce: string;
+  nonce: string;
   path: string;
 };
 

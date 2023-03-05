@@ -12,20 +12,20 @@ import { JWTMetadata } from "../types";
 export const oauthHandler = async (req: Request, res: Response) => {
   const provider = req.params.provider as OAuthProvider;
   const code = req.query.code as string;
-  const { nounce, path } = JSON.parse(req.query.state as string) as OAuthState;
+  const { nonce, path } = JSON.parse(req.query.state as string) as OAuthState;
 
   try {
     // Check if the authorized user isn't an attacker
-    const nounceExists = await redisClient.exists(nounce);
-    if (!nounceExists) {
+    const nonceExists = await redisClient.exists(nonce);
+    if (!nonceExists) {
       return res.redirect(frontendOrigin + "/404");
     }
 
     // Upsert a user to the database
     const tokenResponse = await getOAuthTokens(provider, code);
-    await upsertOAuthUser(provider, tokenResponse, nounce);
+    await upsertOAuthUser(provider, tokenResponse, nonce);
 
-    return res.redirect(`${frontendOrigin}/${path}?nounce=${nounce}`);
+    return res.redirect(`${frontendOrigin}/${path}?nonce=${nonce}`);
   } catch (e: any) {
     return res.redirect(frontendOrigin);
   }
@@ -72,7 +72,7 @@ export const getOAuthTokens = async (
 const upsertOAuthUser = async (
   provider: OAuthProvider,
   tokenResponse: any,
-  nounce: string
+  nonce: string
 ) => {
   const { tokenEndpoint, userInfoEndpoint } = oauthConfig[provider];
   const accessToken = tokenResponse[tokenEndpoint.userInfoAccessTokenKey];
@@ -105,7 +105,7 @@ const upsertOAuthUser = async (
       oauthId: id,
       avatorImagePath: picture,
     };
-    await redisClient.set(nounce, JSON.stringify(userData));
+    await redisClient.set(nonce, JSON.stringify(userData));
 
     if (!existingUser) {
       await userRepository.save(initUser(userData));
