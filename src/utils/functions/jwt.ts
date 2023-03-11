@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { getRandomString } from ".";
 import { redisClient } from "../../db/redis";
 import { JWTHeader, JWTMetadata, JWTPayload } from "../types";
 
@@ -63,8 +64,9 @@ export const generateJwtHeader = () => {
   return header;
 };
 
-export const generateJwtPayload = (data: JWTMetadata, iat: number) => {
+export const generateJwtPayload = (data: JWTMetadata, sessionId: string) => {
   const { oauthProvider, oauthId, name, avatorImagePath } = data;
+  const iat = Math.floor(new Date().getTime() / 1000);
 
   const payload: JWTPayload = {
     iss: "totokunaga",
@@ -77,20 +79,31 @@ export const generateJwtPayload = (data: JWTMetadata, iat: number) => {
       oauthProvider,
       oauthId,
       avatorImagePath,
+      sessionId,
     },
   };
 
   return payload;
 };
 
-export const generateIdToken = async (data: JWTMetadata) => {
-  const iat = Math.floor(new Date().getTime() / 1000);
+export const generateIdToken = async (
+  data: JWTMetadata,
+  givenSessionId?: string
+) => {
+  const sessionId = givenSessionId || getRandomString(16);
   const header = generateJwtHeader();
-  const payload = generateJwtPayload(data, iat);
+  const payload = generateJwtPayload(data, sessionId);
   const idToken = generateJwt(header, payload, sha256Secret);
 
-  const { oauthProvider, oauthId } = data;
-  await redisClient.set(`${oauthProvider}_${oauthId}`, iat);
+  if (!givenSessionId) {
+    const { oauthProvider, oauthId } = data;
+    const userKey = `${oauthProvider}_${oauthId}`;
+    // Prevent concurrent login by deleting sessions with a same identity
+    const userSessions = await redisClient.keys(`${userKey}*`);
+    userSessions.forEach(async (session) => await redisClient.del(session));
+
+    await redisClient.set(`${userKey}:${sessionId}`, 1);
+  }
 
   return idToken;
 };

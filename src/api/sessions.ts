@@ -11,7 +11,7 @@ import { oauthHandler } from "../utils/functions/oauth";
 const sessionRouter = Router();
 
 sessionRouter.post(
-  paths.session.savenonce,
+  paths.session.saveNonce,
   async (req: Request, res: Response) => {
     const { nonce } = req.body;
     try {
@@ -41,18 +41,22 @@ sessionRouter.get(
 
     if (decodedJwt) {
       const { payload } = decodedJwt;
-      const { iat, exp, metadata } = payload;
-      const { oauthProvider, oauthId } = metadata;
+      const { exp, metadata } = payload;
+      const { oauthProvider, oauthId, sessionId } = metadata;
 
       const now = Math.floor(new Date().getTime() / 1000);
-      const currIat = iat.toString();
-      const lastIat = await redisClient.get(`${oauthProvider}_${oauthId}`);
+      const redisKey = `${oauthProvider}_${oauthId}:${sessionId}`;
+      const doesSessionExist = await redisClient.exists(redisKey);
 
-      if (currIat === lastIat && now <= exp) {
-        const newToken = await generateIdToken(metadata);
+      if (doesSessionExist && now <= exp) {
+        const newToken = await generateIdToken(metadata, sessionId);
         return res.send(newToken);
       }
+      return res
+        .status(401)
+        .send({ message: "User session was not found. Login required" });
     } else {
+      // first time token generation
       const nonceKey = oldToken || "";
       const userSession = await redisClient.get(nonceKey);
       if (userSession) {
@@ -61,9 +65,10 @@ sessionRouter.get(
         await redisClient.del(nonceKey);
         return res.send(newToken);
       }
+      return res
+        .status(401)
+        .send({ message: "User nonce was not found. Login required" });
     }
-
-    return res.status(401).send("login session expired");
   }
 );
 

@@ -62,9 +62,7 @@ export const getOAuthTokens = async (
     });
     return res.data;
   } catch (e: any) {
-    // console.log(e, `Failed to fetch "${provider}" OAuth Tokens`);
-    console.log(e.response);
-    console.log(e.message);
+    console.log(e, `Failed to fetch "${provider}" OAuth Tokens`);
     throw new Error(e.message);
   }
 };

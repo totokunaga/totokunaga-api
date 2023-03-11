@@ -7,7 +7,7 @@ export const paths = {
   health: `${ROOT}/health`,
   session: {
     root: `${ROOT}${SESSION}`,
-    savenonce: `/oauth/save_nonce`,
+    saveNonce: `/oauth/save_nonce`,
     oauthRedirect: `/oauth/:provider`,
     logout: `/oauth/logout`,
     tokenRefresh: `/token/refresh`,

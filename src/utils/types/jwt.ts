@@ -10,6 +10,7 @@ export type JWTMetadata = {
   oauthProvider: OAuthProvider;
   oauthId: string;
   avatorImagePath?: string;
+  sessionId?: string;
 };
 
 export type RegisteredClaimName = {
